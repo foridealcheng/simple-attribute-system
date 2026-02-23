@@ -60,7 +60,6 @@
         <!-- Flink JSON/Avro 连接器在 1.17 中已包含在 flink-streaming-java 中 -->
 
         <!-- ========== Fluss 依赖 ========== -->
-        <!-- 注意：Fluss 尚未发布到公共 Maven 仓库，需要本地安装或使用替代方案
         <dependency>
             <groupId>org.apache.fluss</groupId>
             <artifactId>fluss-client</artifactId>
@@ -71,14 +70,6 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-fluss</artifactId>
             <version>${flink.version}</version>
-        </dependency>
-        -->
-
-        <!-- 临时使用 Kafka 作为替代（用于编译测试） -->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka</artifactId>
-            <version>3.0.1-1.18</version>
         </dependency>
 
         <!-- ========== RocketMQ 依赖 ========== -->
