@@ -66,11 +66,14 @@
             <version>${fluss.version}</version>
         </dependency>
 
+        <!-- Flink connector 暂未发布，使用 Fluss KV Client 直接访问 -->
+        <!-- 
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-fluss</artifactId>
-            <version>1.19.0</version>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-flink-1.17</artifactId>
+            <version>${fluss.version}</version>
         </dependency>
+        -->
 
         <!-- ========== RocketMQ 依赖 ========== -->
         <dependency>
