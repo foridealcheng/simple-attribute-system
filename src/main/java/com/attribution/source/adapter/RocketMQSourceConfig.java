@@ -17,7 +17,9 @@ import java.util.Properties;
  */
 @Data
 @Builder
-public class RocketMQSourceConfig implements SourceConfig {
+public class RocketMQSourceConfig implements SourceConfig, java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String SOURCE_TYPE = "ROCKETMQ";
 

@@ -50,6 +50,12 @@ public class ConversionEvent implements Serializable {
     private String advertiserId;
 
     /**
+     * 广告系列 ID
+     */
+    @JsonProperty("campaign_id")
+    private String campaignId;
+
+    /**
      * 转化类型（install/register/purchase 等）
      */
     @JsonProperty("conversion_type")
@@ -78,6 +84,12 @@ public class ConversionEvent implements Serializable {
      */
     @JsonProperty("quantity")
     private Integer quantity;
+
+    /**
+     * 交易 ID
+     */
+    @JsonProperty("transaction_id")
+    private String transactionId;
 
     /**
      * IP 地址

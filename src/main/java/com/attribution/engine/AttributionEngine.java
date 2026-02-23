@@ -5,7 +5,7 @@ import com.attribution.function.AttributionFunctionFactory;
 import com.attribution.model.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * 归因引擎核心
@@ -17,7 +17,9 @@ import java.util.List;
  * @version 1.0.0
  */
 @Slf4j
-public class AttributionEngine {
+public class AttributionEngine implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 默认的归因窗口（小时）

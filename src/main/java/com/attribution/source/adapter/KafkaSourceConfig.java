@@ -17,7 +17,9 @@ import java.util.Properties;
  */
 @Data
 @Builder
-public class KafkaSourceConfig implements SourceConfig {
+public class KafkaSourceConfig implements SourceConfig, java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String SOURCE_TYPE = "KAFKA";
 
