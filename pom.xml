@@ -19,7 +19,7 @@
         
         <!-- 核心依赖版本 -->
         <flink.version>1.17.1</flink.version>
-        <fluss.version>0.4.0</fluss.version>
+        <fluss.version>0.8.0-incubating</fluss.version>
         <rocketmq.version>5.0.0</rocketmq.version>
         <kafka.version>3.4.0</kafka.version>
         <java.version>11</java.version>
@@ -60,8 +60,6 @@
         <!-- Flink JSON/Avro 连接器在 1.17 中已包含在 flink-streaming-java 中 -->
 
         <!-- ========== Fluss 依赖 ========== -->
-        <!-- 注意：Fluss 0.4.0 尚未发布到公共 Maven 仓库
-             需要先从源码编译安装或使用替代方案
         <dependency>
             <groupId>org.apache.fluss</groupId>
             <artifactId>fluss-client</artifactId>
@@ -71,9 +69,8 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-fluss</artifactId>
-            <version>${flink.version}</version>
+            <version>1.19.0</version>
         </dependency>
-        -->
 
         <!-- ========== RocketMQ 依赖 ========== -->
         <dependency>
@@ -333,6 +330,18 @@
         <repository>
             <id>apache-releases</id>
             <url>https://repository.apache.org/content/repositories/releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- Apache Incubator (for Fluss incubating versions) -->
+        <repository>
+            <id>apache-incubator</id>
+            <url>https://repository.apache.org/content/repositories/incubator</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
