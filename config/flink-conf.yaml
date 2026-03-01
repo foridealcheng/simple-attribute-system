@@ -1,0 +1,50 @@
+# Flink 配置文件
+
+# JobManager 配置
+jobmanager.rpc.address: flink-jobmanager
+jobmanager.rpc.port: 6123
+jobmanager.bind-host-address: 0.0.0.0
+jobmanager.advertiseable-address: flink-jobmanager
+
+# TaskManager 配置
+taskmanager.numberOfTaskSlots: 4
+taskmanager.bind-host-address: 0.0.0.0
+taskmanager.host: localhost
+taskmanager.memory.process.size: 2048m
+
+# 网络配置
+taskmanager.network.memory.fraction: 0.4
+taskmanager.network.memory.min: 512mb
+taskmanager.network.memory.max: 1gb
+
+# Checkpoint 配置
+state.backend: filesystem
+state.checkpoints.dir: file:///tmp/flink-checkpoints
+state.savepoints.dir: file:///tmp/flink-savepoints
+execution.checkpointing.interval: 60000
+execution.checkpointing.timeout: 300000
+execution.checkpointing.max-concurrent-checkpoints: 1
+execution.checkpointing.min-pause: 30000
+execution.checkpointing.externalized-checkpoint-retention: RETAIN_ON_CANCELLATION
+
+# 重启策略
+restart-strategy: fixed-delay
+restart-strategy.fixed-delay.attempts: 3
+restart-strategy.fixed-delay.delay: 10s
+
+# Web UI 配置
+web.submit.enable: true
+web.refresh-interval: 5000
+web.log.path: /opt/flink/log
+web.history: 100
+
+# 序列化配置
+serialization.async-records: true
+
+# 指标配置
+metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+metrics.reporter.prom.port: 9249
+
+# Kafka 连接器配置
+kafka.consumer.pooling.enable: true
+kafka.producer.pooling.enable: true

@@ -1,0 +1,155 @@
+version: '3.8'
+
+# 归因系统本地测试环境
+# 包含：Kafka, Flink, Zookeeper
+
+services:
+  # ========== Zookeeper ==========
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - attribution-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== Kafka ==========
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+    networks:
+      - attribution-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # ========== Flink JobManager ==========
+  flink-jobmanager:
+    image: flink:1.17.1
+    container_name: flink-jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - "FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager"
+    networks:
+      - attribution-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # ========== Flink TaskManager ==========
+  flink-taskmanager:
+    image: flink:1.17.1
+    container_name: flink-taskmanager
+    command: taskmanager
+    environment:
+      - "FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager\ntaskmanager.numberOfTaskSlots: 4\ntaskmanager.memory.process.size: 2048m"
+    networks:
+      - attribution-network
+    depends_on:
+      - flink-jobmanager
+
+  # ========== Kafka UI (可选) ==========
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: attribution-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - attribution-network
+    depends_on:
+      - kafka
+
+networks:
+  attribution-network:
+    driver: bridge
+
+  # ========== RocketMQ NameServer ==========
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.1.0
+    container_name: rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    environment:
+      - JAVA_OPT_EXT=-Xms512m -Xmx512m
+    command: sh mqnamesrv
+    networks:
+      - attribution-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9876"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== RocketMQ Broker ==========
+  rocketmq-broker:
+    image: apache/rocketmq:5.1.0
+    container_name: rocketmq-broker
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+    environment:
+      - NAMESRV_ADDR=rocketmq-namesrv:9876
+      - JAVA_OPT_EXT=-Xms512m -Xmx512m
+      - BROKER_ID=0
+      - BROKER_NAME=broker-a
+      - AUTO_CREATE_TOPIC_ENABLE=true
+      - ACL_ENABLE=false
+    command: sh mqbroker -c /home/rocketmq/rocketmq-5.1.0/conf/broker.conf
+    networks:
+      - attribution-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "10911"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== RocketMQ Console (可选) ==========
+  rocketmq-console:
+    image: apache/rocketmq-console:2.0.0
+    container_name: rocketmq-console
+    depends_on:
+      - rocketmq-namesrv
+    ports:
+      - "8082:8080"
+    environment:
+      - JAVA_OPTS=-Dlogging.level.root=INFO
+      - rocketmq.config.namesrvAddr=rocketmq-namesrv:9876
+      - rocketmq.config.isVIPChannel=false
+    networks:
+      - attribution-network

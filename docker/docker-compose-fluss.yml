@@ -1,0 +1,78 @@
+version: '3.8'
+
+# Apache Fluss 单机部署（用于本地测试）
+# 注意：Fluss 目前还在孵化阶段，使用最新镜像
+
+services:
+  # Fluss ZooKeeper (Fluss 依赖 ZK)
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: fluss-zookeeper
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper:2888:3888;2181
+    ports:
+      - "2181:2181"
+    networks:
+      - fluss-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Fluss Coordinator (类似 JobManager)
+  fluss-coordinator:
+    image: apache/fluss:latest
+    container_name: fluss-coordinator
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      FLUSS_COORDINATOR_HOST: fluss-coordinator
+      FLUSS_ZOOKEEPER_CONNECT: zookeeper:2181
+      FLUSS_DEFAULT_PARALLELISM: 1
+    ports:
+      - "9110:9110"  # Coordinator RPC
+      - "9111:9111"  # Web UI
+    networks:
+      - fluss-network
+    volumes:
+      - fluss-coordinator-data:/var/lib/fluss
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Fluss Server (数据节点)
+  fluss-server:
+    image: apache/fluss:latest
+    container_name: fluss-server
+    depends_on:
+      fluss-coordinator:
+        condition: service_healthy
+    environment:
+      FLUSS_SERVER_HOST: fluss-server
+      FLUSS_COORDINATOR_HOST: fluss-coordinator
+      FLUSS_ZOOKEEPER_CONNECT: zookeeper:2181
+      FLUSS_DEFAULT_PARALLELISM: 1
+    ports:
+      - "9112:9112"  # Server RPC
+    networks:
+      - fluss-network
+    volumes:
+      - fluss-server-data:/var/lib/fluss
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9112/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  fluss-network:
+    driver: bridge
+
+volumes:
+  fluss-coordinator-data:
+  fluss-server-data:

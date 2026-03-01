@@ -1,0 +1,22 @@
+# Simple Attribute System
+
+实时广告归因系统
+
+## 技术栈
+- Apache Flink 1.18.1
+- Apache Fluss 0.4.0
+- RocketMQ 5.0.0
+- Java 11
+- Maven
+
+## 快速开始
+
+```bash
+# 编译
+mvn clean package -DskipTests
+
+# 本地开发
+cd docker && docker-compose up -d
+```
+
+详细文档请参考 README.md

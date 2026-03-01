@@ -1,0 +1,41 @@
+# Click Writer Job 配置
+# v2.1.0
+
+# Flink 作业配置
+job.name=click-writer-job
+job.parallelism=1  # 本地测试设置为 1
+
+# Kafka Source 配置
+kafka.bootstrap.servers=kafka:29092
+kafka.source.topic=click-events
+kafka.source.group=click-writer-group
+kafka.source.offsets=earliest
+
+# Click 存储后端配置
+# 可选值：redis（默认）, fluss-cluster
+# 注意：不支持 local-cache，因为三个独立 JVM 进程需要共享存储
+click.store.type=redis
+fluss.bootstrap.servers=fluss:9110
+fluss.kv.table.name=attribution-clicks
+
+# Redis 配置（当 click.store.type=redis 时）
+click.redis.host=redis  # Docker 环境使用 "redis"，本地使用 "localhost"
+click.redis.port=6379
+click.redis.ttl-seconds=3600
+
+fluss.batch.size=100
+fluss.batch.interval.ms=1000
+
+# Click 配置
+click.max.per.user=50
+click.dedup.enabled=true
+click.dedup.window.ms=3600000
+
+# DLQ 配置
+dlq.enabled=true
+dlq.topic=click-dlq
+
+# 监控配置
+metrics.enabled=true
+metrics.reporter=prometheus
+metrics.port=9090

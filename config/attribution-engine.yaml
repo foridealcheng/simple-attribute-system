@@ -1,0 +1,47 @@
+# Attribution Engine Job 配置
+# v2.1.0
+
+# Flink 作业配置
+job.name=attribution-engine-job
+job.parallelism=1  # 本地测试设置为 1
+
+# Kafka Source 配置
+kafka.bootstrap.servers=kafka:29092
+kafka.source.topic=conversion-events
+kafka.source.group=attribution-engine-group
+kafka.source.offsets=earliest
+
+# Click 存储后端配置
+# 可选值：redis（默认）, fluss-cluster
+# 注意：不支持 local-cache，因为三个独立 JVM 进程需要共享存储
+click.store.type=redis
+fluss.bootstrap.servers=fluss:9110
+fluss.kv.table.name=attribution-clicks
+
+# Redis 配置（当 click.store.type=redis 时）
+click.redis.host=redis  # Docker 环境使用 "redis"，本地使用 "localhost"
+click.redis.port=6379
+click.redis.ttl-seconds=3600
+
+fluss.async.timeout.ms=5000
+fluss.async.concurrency=10
+
+# 归因配置
+attribution.window.ms=604800000
+attribution.model=LAST_CLICK
+attribution.max.clicks=50
+
+# 结果输出配置
+result.success.topic=attribution-results-success
+result.failed.topic=attribution-results-failed
+
+# RocketMQ 重试配置
+rocketmq.nameserver.address=rocketmq-namesrv:9876
+rocketmq.producer.group=attribution-retry-producer
+rocketmq.retry.topic=attribution-retry
+rocketmq.max.retries=10
+
+# 监控配置
+metrics.enabled=true
+metrics.reporter=prometheus
+metrics.port=9091
